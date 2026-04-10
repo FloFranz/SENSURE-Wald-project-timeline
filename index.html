@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENSURE Wald Projekt Zeitplan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181a23;
+    --surface-raised: #1e2130;
+    --border: #2a2d3e;
+    --border-light: #353849;
+    --text: #e2e4ed;
+    --text-muted: #8b8fa3;
+    --text-dim: #5c6078;
+    --accent: #6c8aff;
+    --accent-glow: rgba(108,138,255,0.15);
+    --wp1: #6c8aff;
+    --wp2: #ff6c8a;
+    --wp3: #8aff6c;
+    --wp4: #ffb86c;
+    --wp5: #c96cff;
+    --wp6: #6cffe0;
+    --wp7: #ff6ce0;
+    --wp8: #ffe06c;
+    --milestone: #ffd700;
+    --progress-bg: rgba(255,255,255,0.06);
+    --today: #ff4757;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === HEADER === */
+  .header {
+    padding: 2.5rem 3rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(108,138,255,0.04) 0%, transparent 100%);
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .header .subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+  .partners {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+  }
+  .partners-label {
+    color: var(--text-dim);
+    margin-right: 0.2rem;
+  }
+  .partner {
+    color: var(--text-muted);
+  }
+  .partner-sep {
+    color: var(--text-dim);
+  }
+  .config-area {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .config-area input[type="text"] {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    width: 420px;
+    max-width: 60vw;
+    transition: border-color 0.2s;
+  }
+  .config-area input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .config-area button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .config-area button:hover { opacity: 0.85; }
+  .btn-secondary {
+    background: var(--surface-raised) !important;
+    color: var(--text-muted) !important;
+    border: 1px solid var(--border) !important;
+  }
+
+  /* === STATUS BAR === */
+  .status-bar {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* === MAIN CONTENT === */
+  .main {
+    padding: 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* === GANTT CHART === */
+  .gantt-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow-x: auto;
+    position: relative;
+  }
+  .gantt-title-bar {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    left: 0;
+  }
+  .gantt-title-bar h2 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .gantt-legend {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  table.gantt {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+  }
+  table.gantt th, table.gantt td {
+    padding: 0;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  table.gantt th:last-child, table.gantt td:last-child {
+    border-right: none;
+  }
+  /* Year header */
+  table.gantt thead tr:first-child th {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.6rem 0.25rem;
+    background: var(--surface-raised);
+    color: var(--text);
+    letter-spacing: 0.04em;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  /* Month header */
+  table.gantt thead tr:nth-child(2) th {
+    font-size: 0.6rem;
+    font-weight: 500;
+    padding: 0.4rem 0.15rem;
+    background: var(--surface-raised);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    position: sticky;
+    top: 32px;
+    z-index: 2;
+  }
+  /* WP name column */
+  table.gantt th.wp-name, table.gantt td.wp-name {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--surface);
+    min-width: 200px;
+    border-right: 2px solid var(--border-light);
+  }
+  table.gantt thead th.wp-name {
+    background: var(--surface-raised);
+    z-index: 3;
+  }
+  /* Progress column */
+  table.gantt th.progress-col, table.gantt td.progress-col {
+    min-width: 80px;
+    width: 80px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    position: sticky;
+    left: 200px;
+    z-index: 1;
+    background: var(--surface);
+    border-right: 2px solid var(--border-light);
+  }
+  table.gantt thead th.progress-col {
+    background: var(--surface-raised);
+    z-index: 3;
+  }
+  /* Gantt cells */
+  table.gantt td.cell {
+    padding: 0;
+    height: 38px;
+    min-width: 32px;
+    position: relative;
+  }
+  .bar {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 1px;
+    right: 1px;
+    border-radius: 3px;
+    opacity: 0.25;
+  }
+  .bar.active {
+    opacity: 0.7;
+  }
+  .bar.progress-fill {
+    opacity: 1;
+    top: 8px;
+    bottom: 8px;
+    border-radius: 3px;
+  }
+  /* Today marker */
+  .today-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--today);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .today-marker::after {
+    content: '▼';
+    position: absolute;
+    top: -2px;
+    left: -5px;
+    font-size: 8px;
+    color: var(--today);
+  }
+  /* Milestone marker - styles defined in milestones section below */
+
+  /* === WP DETAIL CARDS === */
+  .cards-section h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+  .wp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .wp-card:hover {
+    border-color: var(--border-light);
+  }
+  .wp-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .wp-card-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .wp-badge {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .wp-card-progress-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .wp-card-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--progress-bg);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+  .wp-card-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .wp-card-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .wp-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* === MILESTONES === */
+  .milestones-section h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .milestone-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .milestone-item {
+    display: grid;
+    grid-template-columns: 1fr 80px 60px 20px;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .milestone-item:hover {
+    border-color: var(--milestone);
+    background: rgba(255,215,0,0.04);
+  }
+  .milestone-item.expanded {
+    border-color: var(--milestone);
+  }
+  .milestone-detail {
+    grid-column: 1 / -1;
+    padding: 0.75rem 0 0.25rem 1.75rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    margin-top: 0.25rem;
+    display: none;
+  }
+  .milestone-item.expanded .milestone-detail {
+    display: block;
+  }
+  .milestone-no-desc {
+    font-style: italic;
+    color: var(--text-dim);
+  }
+  .milestone-expand-hint {
+    text-align: right;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+  }
+  .milestone-item.expanded .milestone-expand-hint {
+    transform: rotate(180deg);
+  }
+
+  /* Gantt milestone tooltip */
+  .milestone-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: var(--milestone);
+    z-index: 4;
+    box-shadow: 0 0 6px rgba(255,215,0,0.5);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .milestone-marker:hover {
+    transform: translate(-50%, -50%) rotate(45deg) scale(1.4);
+  }
+
+  /* Popup overlay for Gantt milestones */
+  .ms-popup-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .ms-popup {
+    background: var(--surface-raised);
+    border: 1px solid var(--milestone);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 20px rgba(255,215,0,0.1);
+    animation: popIn 0.2s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .ms-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .ms-popup-header .milestone-diamond {
+    width: 14px;
+    height: 14px;
+  }
+  .ms-popup-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .ms-popup-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+  }
+  .ms-popup-close:hover { color: var(--text); }
+  .ms-popup-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .ms-popup-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .ms-popup-desc {
+    font-size: 0.82rem;
+    color: var(--text);
+    line-height: 1.7;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .milestone-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    min-width: 80px;
+  }
+  .milestone-id-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: rgba(255,215,0,0.15);
+    color: var(--milestone);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255,215,0,0.3);
+    white-space: nowrap;
+  }
+  .milestone-label {
+    color: var(--text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .milestone-label .milestone-diamond {
+    position: static;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    min-height: 10px;
+    background: var(--milestone);
+    box-shadow: 0 0 6px rgba(255,215,0,0.3);
+    cursor: default;
+  }
+  .milestone-wp {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    text-align: right;
+  }
+
+  /* === INSTRUCTIONS === */
+  .instructions {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+  .instructions h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  .instructions p, .instructions li {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .instructions ol {
+    padding-left: 1.25rem;
+  }
+  .instructions li { margin-bottom: 0.35rem; }
+  .instructions code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    background: var(--surface-raised);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+  .instructions .sheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.75rem;
+  }
+  .instructions .sheet-table th,
+  .instructions .sheet-table td {
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+  }
+  .instructions .sheet-table th {
+    background: var(--surface-raised);
+    font-weight: 600;
+    color: var(--text);
+  }
+  .instructions .sheet-table td {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* === LOADING & ERROR === */
+  .loading {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .loading .spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg {
+    background: rgba(255,71,87,0.1);
+    border: 1px solid rgba(255,71,87,0.3);
+    color: #ff6b7a;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    margin: 1rem 3rem;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 768px) {
+    .header, .main, .status-bar { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .config-area input[type="text"] { width: 100%; max-width: none; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .status-bar { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1 id="projectTitle">SENSURE Wald Projekt Zeitplan</h1>
+      <div class="subtitle" id="projectSubtitle">Sentinel-2-Super-Resolution mit Methoden der Künstlichen Intelligenz zur fernerkundungsbasierten Erfassung von Waldschadensflächen</div>
+      <div class="partners">
+        <span class="partner">Nordwestdeutsche Forstliche Versuchsanstalt (NW-FVA)</span>
+        <span class="partner-sep">·</span>
+        <span class="partner">Hochschule RheinMain (HSRM)</span>
+        <span class="partner-sep">·</span>
+        <span class="partner">HessenForst</span>
+      </div>
+    </div>
+    <input type="hidden" id="sheetUrl" />
+  </div>
+</div>
+
+<div id="statusBar" class="status-bar" style="display:none;"></div>
+<div id="errorArea"></div>
+<div class="main" id="mainContent">
+
+  <div id="ganttArea"><div class="loading"><div class="spinner"></div>Loading project data…</div></div>
+  <div id="cardsArea"></div>
+  <div id="milestonesArea"></div>
+</div>
+
+<script>
+const MONTH_LABELS = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+const MONTH_FULL = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WP_COLORS = ['#6c8aff','#ff6c8a','#8aff6c','#ffb86c','#c96cff','#6cffe0','#ff6ce0','#ffe06c','#88ccff','#ff8888'];
+
+// ── CSV Parsing with column name normalization ──
+const COLUMN_ALIASES = {
+  // Work Packages
+  'wp': 'wp', 'arbeitspaket': 'wp', 'work_package': 'wp', 'workpackage': 'wp', 'ap': 'wp', 'id': 'wp',
+  'name': 'name', 'bezeichnung': 'name', 'titel': 'name', 'title': 'name',
+  'start': 'start', 'beginn': 'start', 'von': 'start', 'from': 'start', 'startdatum': 'start',
+  'end': 'end', 'ende': 'end', 'bis': 'end', 'to': 'end', 'enddatum': 'end',
+  'progress': 'progress', 'fortschritt': 'progress', 'status': 'progress', '%': 'progress', 'percent': 'progress',
+  'lead': 'lead', 'zuständigkeit': 'lead', 'zustaendigkeit': 'lead', 'verantwortlich': 'lead', 'responsible': 'lead', 'owner': 'lead', 'person': 'lead',
+  'color': 'color', 'farbe': 'color', 'colour': 'color',
+  // Milestones
+  'meilenstein': 'id', 'milestone': 'id',
+  'date': 'date', 'datum': 'date', 'fälligkeit': 'date', 'falligkeit': 'date', 'faelligkeit': 'date', 'fällig': 'date', 'due': 'date', 'termin': 'date',
+  'beschreibung': 'description', 'description': 'description', 'details': 'description', 'info': 'description', 'text': 'description', 'anmerkung': 'description', 'kommentar': 'description', 'notes': 'description',
+  'arbeitspaket': 'wp',
+};
+
+function normalizeHeader(h) {
+  const clean = h.trim().replace(/^"|"$/g, '').toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss');
+  // Try exact match first (on original lowercase)
+  const orig = h.trim().replace(/^"|"$/g, '').toLowerCase();
+  if (COLUMN_ALIASES[orig]) return COLUMN_ALIASES[orig];
+  // Try with umlauts replaced
+  if (COLUMN_ALIASES[clean]) return COLUMN_ALIASES[clean];
+  return orig;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const headers = rawHeaders.map(h => normalizeHeader(h));
+  return lines.slice(1).filter(line => line.trim().length > 0).map(line => {
+    // Handle commas inside quoted fields
+    const vals = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQuotes = !inQuotes; }
+      else if (ch === ',' && !inQuotes) { vals.push(current.trim()); current = ''; }
+      else { current += ch; }
+    }
+    vals.push(current.trim());
+
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g, ''));
+    return obj;
+  });
+}
+
+// Also handle full date formats like 2026-03-01 → extract YYYY-MM
+function parseMonth(str) {
+  if (!str) return null;
+  const clean = str.trim();
+  const parts = clean.split('-');
+  return { year: parseInt(parts[0]), month: parseInt(parts[1]) };
+}
+
+function monthIndex(year, month, startYear, startMonth) {
+  return (year - startYear) * 12 + (month - startMonth);
+}
+
+// ── Build Timeline Range ──
+function getTimelineRange(workPackages) {
+  let minY = 9999, minM = 12, maxY = 0, maxM = 1;
+  workPackages.forEach(wp => {
+    const s = parseMonth(wp.start);
+    const e = parseMonth(wp.end);
+    if (s) {
+      if (s.year < minY || (s.year === minY && s.month < minM)) { minY = s.year; minM = s.month; }
+    }
+    if (e) {
+      if (e.year > maxY || (e.year === maxY && e.month > maxM)) { maxY = e.year; maxM = e.month; }
+    }
+  });
+  return { startYear: minY, startMonth: minM, endYear: maxY, endMonth: maxM };
+}
+
+// ── Render Everything ──
+function render(workPackages, milestones) {
+
+  const range = getTimelineRange(workPackages);
+  const totalMonths = monthIndex(range.endYear, range.endMonth, range.startYear, range.startMonth) + 1;
+
+  // Assign colors
+  workPackages.forEach((wp, i) => {
+    if (!wp.color) wp.color = WP_COLORS[i % WP_COLORS.length];
+  });
+
+  // Overall progress
+  const overallProgress = workPackages.length > 0
+    ? Math.round(workPackages.reduce((s, w) => s + parseInt(w.progress || 0), 0) / workPackages.length)
+    : 0;
+
+  // Today
+  const now = new Date();
+  const todayYear = now.getFullYear();
+  const todayMonth = now.getMonth() + 1;
+  const todayIdx = monthIndex(todayYear, todayMonth, range.startYear, range.startMonth);
+  const todayFraction = now.getDate() / new Date(todayYear, todayMonth, 0).getDate();
+
+  // ── Status Bar ──
+  const statusBar = document.getElementById('statusBar');
+  statusBar.style.display = 'flex';
+  statusBar.innerHTML = `
+    <div class="stat">
+      <span class="stat-label">Work Packages</span>
+      <span class="stat-value">${workPackages.length}</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Milestones</span>
+      <span class="stat-value">${milestones.length}</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Overall Progress</span>
+      <span class="stat-value" style="color:${overallProgress > 66 ? '#8aff6c' : overallProgress > 33 ? '#ffb86c' : '#ff6c8a'}">${overallProgress}%</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Duration</span>
+      <span class="stat-value">${totalMonths} months</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Period</span>
+      <span class="stat-value" style="font-size:0.85rem">${range.startYear}-${String(range.startMonth).padStart(2,'0')} → ${range.endYear}-${String(range.endMonth).padStart(2,'0')}</span>
+    </div>
+  `;
+
+  // ── Gantt Table ──
+  // Build year spans
+  let years = [];
+  for (let y = range.startYear; y <= range.endYear; y++) {
+    const mStart = (y === range.startYear) ? range.startMonth : 1;
+    const mEnd = (y === range.endYear) ? range.endMonth : 12;
+    years.push({ year: y, from: mStart, to: mEnd, span: mEnd - mStart + 1 });
+  }
+
+  let yearRow = '<tr><th class="wp-name" rowspan="2">Work Package</th><th class="progress-col" rowspan="2">Progress</th>';
+  years.forEach(y => { yearRow += `<th colspan="${y.span}">${y.year}</th>`; });
+  yearRow += '</tr>';
+
+  let monthRow = '<tr>';
+  years.forEach(y => {
+    for (let m = y.from; m <= y.to; m++) {
+      monthRow += `<th>${MONTH_LABELS[m - 1]}</th>`;
+    }
+  });
+  monthRow += '</tr>';
+
+  let bodyRows = '';
+  workPackages.forEach(wp => {
+    const s = parseMonth(wp.start);
+    const e = parseMonth(wp.end);
+    const sIdx = s ? monthIndex(s.year, s.month, range.startYear, range.startMonth) : -1;
+    const eIdx = e ? monthIndex(e.year, e.month, range.startYear, range.startMonth) : -1;
+    const prog = parseInt(wp.progress || 0);
+    const progColor = prog > 66 ? '#8aff6c' : prog > 33 ? '#ffb86c' : '#ff6c8a';
+
+    bodyRows += `<tr>`;
+    bodyRows += `<td class="wp-name"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${wp.color};margin-right:8px;"></span>${wp.wp || ''} ${wp.name || ''}</td>`;
+    bodyRows += `<td class="progress-col" style="color:${progColor}">${prog}%</td>`;
+
+    for (let i = 0; i < totalMonths; i++) {
+      let cellContent = '';
+      const isInRange = (i >= sIdx && i <= eIdx);
+
+      if (isInRange) {
+        // Background bar (full range)
+        cellContent += `<div class="bar active" style="background:${wp.color};"></div>`;
+        // Progress fill
+        const rangeLen = eIdx - sIdx + 1;
+        const progMonths = Math.round(rangeLen * prog / 100);
+        if (i >= sIdx && i < sIdx + progMonths) {
+          cellContent += `<div class="bar progress-fill" style="background:${wp.color};"></div>`;
+        }
+      }
+
+      // Milestone diamonds
+      milestones.forEach(ms => {
+        if (ms.wp && ms.wp.toUpperCase() === (wp.wp || '').toUpperCase()) {
+          const mDate = parseMonth(ms.date);
+          if (mDate) {
+            const mIdx = monthIndex(mDate.year, mDate.month, range.startYear, range.startMonth);
+            if (mIdx === i) {
+              const msId = (ms.id || ms.name || '').replace(/"/g, '&quot;');
+              const msName = (ms.name || ms.id || '').replace(/"/g, '&quot;');
+              const msDesc = (ms.description || '').replace(/"/g, '&quot;');
+              const msWp = (ms.wp || '').replace(/"/g, '&quot;');
+              const msDateLabel = `${MONTH_FULL[mDate.month-1]} ${mDate.year}`;
+              cellContent += `<div class="milestone-marker" onclick="showMsPopup('${msId}', '${msName}', '${msDateLabel}', '${msWp}', '${msDesc}')" title="${msId}: ${msName}"></div>`;
+            }
+          }
+        }
+      });
+
+      // Today line
+      if (i === todayIdx) {
+        cellContent += `<div class="today-marker" style="left:${todayFraction * 100}%"></div>`;
+      }
+
+      bodyRows += `<td class="cell">${cellContent}</td>`;
+    }
+    bodyRows += '</tr>';
+  });
+
+  document.getElementById('ganttArea').innerHTML = `
+    <div class="gantt-container">
+      <div class="gantt-title-bar">
+        <h2>Project Timeline</h2>
+        <div class="gantt-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--milestone);transform:rotate(45deg);"></div> Milestone</div>
+          <div class="legend-item"><div style="width:20px;height:2px;background:var(--today);"></div> Today</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.3);"></div> Planned</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.8);"></div> Completed</div>
+        </div>
+      </div>
+      <table class="gantt">
+        <thead>${yearRow}${monthRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+
+  // ── WP Cards ──
+  let cardsHtml = workPackages.map(wp => {
+    const prog = parseInt(wp.progress || 0);
+    const s = parseMonth(wp.start);
+    const e = parseMonth(wp.end);
+    const startLabel = s ? `${MONTH_FULL[s.month-1]} ${s.year}` : '—';
+    const endLabel = e ? `${MONTH_FULL[e.month-1]} ${e.year}` : '—';
+    return `
+      <div class="wp-card">
+        <div class="wp-card-header">
+          <div class="wp-card-title"><span class="wp-badge" style="background:${wp.color}"></span>${wp.wp} — ${wp.name}</div>
+          <div class="wp-card-progress-num" style="color:${wp.color}">${prog}%</div>
+        </div>
+        <div class="wp-card-bar"><div class="wp-card-bar-fill" style="width:${prog}%;background:${wp.color}"></div></div>
+        <div class="wp-card-meta">
+          <span>📅 ${startLabel} → ${endLabel}</span>
+          <span>👤 ${wp.lead || '—'}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('cardsArea').innerHTML = `
+    <div class="cards-section">
+      <h2>Work Package Details</h2>
+      <div class="cards-grid">${cardsHtml}</div>
+    </div>`;
+
+  // ── Milestones List ──
+  if (milestones.length > 0) {
+    const sorted = [...milestones].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    let msHtml = sorted.map(ms => {
+      const d = parseMonth(ms.date);
+      const label = d ? `${MONTH_FULL[d.month-1]} ${d.year}` : '—';
+      const desc = ms.description || '';
+      const formattedDesc = boldMilestoneKeyword(ms.id || '', desc);
+      const descHtml = desc
+        ? `<div class="milestone-detail">${formattedDesc}</div>`
+        : `<div class="milestone-detail"><span class="milestone-no-desc">Keine Beschreibung vorhanden. Füge eine Spalte "Beschreibung" in der Meilensteine-Tabelle hinzu.</span></div>`;
+      return `
+        <div class="milestone-item" onclick="this.classList.toggle('expanded')">
+          <span class="milestone-label"><div class="milestone-diamond"></div>${ms.name || ms.id || ''}</span>
+          <span class="milestone-date">${label}</span>
+          <span class="milestone-wp">${ms.wp || ''}</span>
+          <span class="milestone-expand-hint">▼</span>
+          ${descHtml}
+        </div>`;
+    }).join('');
+    document.getElementById('milestonesArea').innerHTML = `
+      <div class="milestones-section">
+        <h2>Milestones</h2>
+        <div class="milestone-list">${msHtml}</div>
+      </div>`;
+  }
+}
+
+// ── Bold keywords in milestone descriptions ──
+const MS_BOLD_KEYWORDS = {
+  'M1': 'Projektorganisation',
+  'M2': 'Waldschadensarten',
+  'M3': 'Referenzdaten',
+  'M4': 'Super-Resolution-Ansätze',
+  'M5': 'Validierungsdaten für Super-Resolution-Ansätze',
+  'M6': 'Optimierte Super-Resolution-Methode',
+  'M7': 'Schadflächendetektion',
+  'M8': 'Validierungsdaten',
+  'M9': 'Optimierte Schadflächendetektion',
+  'M10': 'Validierungstool',
+  'M11': 'Prozessierungsketten',
+  'M12': 'Integration',
+  'M13': 'Know-how-Transfer',
+};
+
+function boldMilestoneKeyword(msId, text) {
+  if (!text) return text;
+  const id = msId.toUpperCase().trim();
+  const keyword = MS_BOLD_KEYWORDS[id];
+  if (!keyword) return text;
+  const idx = text.indexOf(keyword);
+  if (idx === -1) return text;
+  return text.substring(0, idx) + '<strong>' + keyword + '</strong>' + text.substring(idx + keyword.length);
+}
+
+// ── Milestone Popup (for Gantt chart clicks) ──
+function showMsPopup(id, name, dateLabel, wp, description) {
+  const formattedDesc = boldMilestoneKeyword(id, description);
+  const descContent = description
+    ? formattedDesc
+    : '<span class="milestone-no-desc">Keine Beschreibung vorhanden.</span>';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'ms-popup-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="ms-popup">
+      <div class="ms-popup-header">
+        <div class="milestone-diamond"></div>
+        <span class="ms-popup-title">${id}: ${name}</span>
+        <button class="ms-popup-close" onclick="this.closest('.ms-popup-overlay').remove()">✕</button>
+      </div>
+      <div class="ms-popup-meta">
+        <span>📅 ${dateLabel}</span>
+        <span>📦 ${wp}</span>
+      </div>
+      <div class="ms-popup-desc">${descContent}</div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+// ── Google Sheets URL helpers ──
+function extractSheetId(url) {
+  // Handle both /d/SHEET_ID/ and /d/e/ENCODED_ID/ formats
+  let match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) return { id: match[1], encoded: false };
+  match = url.match(/\/spreadsheets\/d\/e\/([a-zA-Z0-9_-]+)/);
+  if (match) return { id: match[1], encoded: true };
+  return null;
+}
+
+function extractGid(url) {
+  const match = url.match(/gid=(\d+)/);
+  return match ? match[1] : '0';
+}
+
+function buildCsvUrl(sheetInfo, gid) {
+  if (sheetInfo.encoded) {
+    return `https://docs.google.com/spreadsheets/d/e/${sheetInfo.id}/pub?gid=${gid}&single=true&output=csv`;
+  }
+  return `https://docs.google.com/spreadsheets/d/${sheetInfo.id}/export?format=csv&gid=${gid}`;
+}
+
+// ── Fetch with CORS fallback ──
+async function fetchCSV(url) {
+  // Try direct fetch first
+  try {
+    const resp = await fetch(url, { mode: 'cors' });
+    if (resp.ok) {
+      const text = await resp.text();
+      if (text.trim().length > 0) return text;
+    }
+  } catch (e) { /* CORS blocked, try proxies */ }
+
+  // Fallback proxies
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+
+  for (const proxyUrl of proxies) {
+    try {
+      const resp = await fetch(proxyUrl);
+      if (resp.ok) {
+        const text = await resp.text();
+        if (text.trim().length > 0) return text;
+      }
+    } catch (e) { continue; }
+  }
+
+  throw new Error('Could not fetch sheet data. Make sure the sheet is published to the web (File → Share → Publish to web).');
+}
+
+// ── Load from Google Sheet ──
+async function loadFromSheet() {
+  const urlInput = document.getElementById('sheetUrl').value.trim();
+  if (!urlInput) { showError('Please paste a Google Sheet URL or published CSV URL.'); return; }
+
+  const urls = urlInput.split(',').map(u => u.trim()).filter(Boolean);
+  showLoading();
+
+  try {
+    // Fetch WorkPackages (first URL)
+    const wpText = await fetchCSV(urls[0]);
+    const workPackages = parseCSV(wpText);
+    if (workPackages.length === 0) throw new Error('No data found in the WorkPackages sheet. Check the column headers.');
+
+    // Fetch Milestones (second URL, optional)
+    let milestones = [];
+    if (urls.length > 1) {
+      try {
+        const msText = await fetchCSV(urls[1]);
+        milestones = parseCSV(msText);
+      } catch (e) {
+        console.warn('Could not load milestones sheet:', e);
+      }
+    }
+
+    clearError();
+    render(workPackages, milestones);
+  } catch (err) {
+    showError(`Error loading sheet: ${err.message}`);
+  }
+}
+
+// ── Demo Data ──
+function loadDemo() {
+  const workPackages = [
+    { wp:'WP1', name:'Project Management & Coordination', start:'2026-01', end:'2028-12', progress:'20', lead:'Dr. Schmidt', color:'#6c8aff' },
+    { wp:'WP2', name:'Requirements & State of the Art', start:'2026-01', end:'2026-12', progress:'75', lead:'Dr. Müller', color:'#ff6c8a' },
+    { wp:'WP3', name:'System Architecture & Design', start:'2026-06', end:'2027-06', progress:'40', lead:'Prof. Weber', color:'#8aff6c' },
+    { wp:'WP4', name:'Core Module Development', start:'2026-10', end:'2028-03', progress:'10', lead:'Dr. Fischer', color:'#ffb86c' },
+    { wp:'WP5', name:'Integration & Testing', start:'2027-06', end:'2028-06', progress:'0', lead:'Dr. Wagner', color:'#c96cff' },
+    { wp:'WP6', name:'Validation & Case Studies', start:'2027-10', end:'2028-09', progress:'0', lead:'Prof. Becker', color:'#6cffe0' },
+    { wp:'WP7', name:'Dissemination & Exploitation', start:'2026-03', end:'2028-12', progress:'15', lead:'Dr. Koch', color:'#ff6ce0' },
+  ];
+  const milestones = [
+    { id:'M1', name:'Kickoff Meeting', date:'2026-01', wp:'WP1' },
+    { id:'M2', name:'Requirements Report Delivered', date:'2026-09', wp:'WP2' },
+    { id:'M3', name:'Architecture Approved', date:'2027-03', wp:'WP3' },
+    { id:'M4', name:'Prototype v1 Ready', date:'2027-09', wp:'WP4' },
+    { id:'M5', name:'Integration Complete', date:'2028-03', wp:'WP5' },
+    { id:'M6', name:'Validation Report', date:'2028-06', wp:'WP6' },
+    { id:'M7', name:'Final Review & Closeout', date:'2028-12', wp:'WP1' },
+  ];
+  document.getElementById('projectTitle').textContent = 'EXAMPLE — Research Project Timeline';
+  document.getElementById('projectSubtitle').textContent = 'Demo data · Connect your Google Sheet to use real project data';
+  clearError();
+  render(workPackages, milestones);
+}
+
+function showLoading() {
+  document.getElementById('ganttArea').innerHTML = '<div class="loading"><div class="spinner"></div>Loading project data…</div>';
+  document.getElementById('cardsArea').innerHTML = '';
+  document.getElementById('milestonesArea').innerHTML = '';
+}
+function showError(msg) {
+  document.getElementById('errorArea').innerHTML = `<div class="error-msg">${msg}</div>`;
+}
+function clearError() {
+  document.getElementById('errorArea').innerHTML = '';
+}
+
+// ── Auto-load on page open ──
+const DEFAULT_WP_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRqOktN8DjDcbyCdlUrxQlY_NGI6_YVO6sVOb4cD4horUUlKm_hkSsEQnR0FC22w05K10fPd-xQCZCe/pub?gid=0&single=true&output=csv';
+const DEFAULT_MS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRqOktN8DjDcbyCdlUrxQlY_NGI6_YVO6sVOb4cD4horUUlKm_hkSsEQnR0FC22w05K10fPd-xQCZCe/pub?gid=269566130&single=true&output=csv';
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sheetUrl').value = DEFAULT_WP_URL + ' , ' + DEFAULT_MS_URL;
+  loadFromSheet();
+});
+</script>
+</body>
+</html>
