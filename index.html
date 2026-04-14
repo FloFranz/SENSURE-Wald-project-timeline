@@ -332,9 +332,13 @@
     border-radius: 10px;
     padding: 1.25rem;
     transition: border-color 0.2s;
+    cursor: pointer;
   }
   .wp-card:hover {
     border-color: var(--border-light);
+  }
+  .wp-card.expanded {
+    border-color: var(--accent);
   }
   .wp-card-header {
     display: flex;
@@ -383,6 +387,82 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
+  }
+  .wp-card-expand-hint {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+  }
+  .wp-card.expanded .wp-card-expand-hint {
+    transform: rotate(180deg);
+  }
+  .wp-card-activities {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .wp-card.expanded .wp-card-activities {
+    display: block;
+  }
+  .wp-card-activities ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .wp-card-activities li {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding: 0.25rem 0 0.25rem 1rem;
+    position: relative;
+  }
+  .wp-card-activities li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .wp-no-activities {
+    font-size: 0.78rem;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+
+  /* Clickable WP name in Gantt */
+  .wp-name-clickable {
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .wp-name-clickable:hover {
+    color: var(--accent);
+  }
+
+  /* WP Popup (reuses milestone popup styles) */
+  .wp-popup-activities {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .wp-popup-activities ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .wp-popup-activities li {
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0.2rem 0 0.2rem 1rem;
+    position: relative;
+  }
+  .wp-popup-activities li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
   }
 
   /* === MILESTONES === */
@@ -701,6 +781,7 @@ const COLUMN_ALIASES = {
   'progress': 'progress', 'fortschritt': 'progress', 'status': 'progress', '%': 'progress', 'percent': 'progress',
   'lead': 'lead', 'zuständigkeit': 'lead', 'zustaendigkeit': 'lead', 'verantwortlich': 'lead', 'responsible': 'lead', 'owner': 'lead', 'person': 'lead',
   'color': 'color', 'farbe': 'color', 'colour': 'color',
+  'activities': 'activities', 'aktivitäten': 'activities', 'aktivitaeten': 'activities', 'aufgaben': 'activities', 'tasks': 'activities', 'outputs': 'activities',
   // Milestones
   'meilenstein': 'id', 'milestone': 'id',
   'date': 'date', 'datum': 'date', 'fälligkeit': 'date', 'falligkeit': 'date', 'faelligkeit': 'date', 'fällig': 'date', 'due': 'date', 'termin': 'date',
@@ -841,6 +922,8 @@ function render(workPackages, milestones) {
   monthRow += '</tr>';
 
   let bodyRows = '';
+  // Store WP data globally for popup access
+  window._wpData = {};
   workPackages.forEach(wp => {
     const s = parseMonth(wp.start);
     const e = parseMonth(wp.end);
@@ -848,9 +931,13 @@ function render(workPackages, milestones) {
     const eIdx = e ? monthIndex(e.year, e.month, range.startYear, range.startMonth) : -1;
     const prog = parseInt(wp.progress || 0);
     const progColor = prog > 66 ? '#8aff6c' : prog > 33 ? '#ffb86c' : '#ff6c8a';
+    const wpId = (wp.wp || '').trim();
+    const startLabel = s ? `${MONTH_FULL[s.month-1]} ${s.year}` : '—';
+    const endLabel = e ? `${MONTH_FULL[e.month-1]} ${e.year}` : '—';
+    window._wpData[wpId] = { ...wp, startLabel, endLabel, prog };
 
     bodyRows += `<tr>`;
-    bodyRows += `<td class="wp-name"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${wp.color};margin-right:8px;"></span>${wp.wp || ''} ${wp.name || ''}</td>`;
+    bodyRows += `<td class="wp-name wp-name-clickable" onclick="showWpPopup('${wpId}')"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${wp.color};margin-right:8px;"></span>${wpId} ${wp.name || ''}</td>`;
     bodyRows += `<td class="progress-col" style="color:${progColor}">${prog}%</td>`;
 
     for (let i = 0; i < totalMonths; i++) {
@@ -920,8 +1007,12 @@ function render(workPackages, milestones) {
     const e = parseMonth(wp.end);
     const startLabel = s ? `${MONTH_FULL[s.month-1]} ${s.year}` : '—';
     const endLabel = e ? `${MONTH_FULL[e.month-1]} ${e.year}` : '—';
+    const activities = wp.activities ? wp.activities.split(';').map(a => a.trim()).filter(Boolean) : [];
+    const activitiesHtml = activities.length > 0
+      ? `<div class="wp-card-activities"><ul>${activities.map(a => `<li>${a}</li>`).join('')}</ul></div>`
+      : `<div class="wp-card-activities"><span class="wp-no-activities">Keine Aktivitäten hinterlegt.</span></div>`;
     return `
-      <div class="wp-card">
+      <div class="wp-card" onclick="this.classList.toggle('expanded')">
         <div class="wp-card-header">
           <div class="wp-card-title"><span class="wp-badge" style="background:${wp.color}"></span>${wp.wp} — ${wp.name}</div>
           <div class="wp-card-progress-num" style="color:${wp.color}">${prog}%</div>
@@ -930,7 +1021,9 @@ function render(workPackages, milestones) {
         <div class="wp-card-meta">
           <span>📅 ${startLabel} → ${endLabel}</span>
           <span>👤 ${wp.lead || '—'}</span>
+          <span class="wp-card-expand-hint">▼</span>
         </div>
+        ${activitiesHtml}
       </div>`;
   }).join('');
 
@@ -1017,6 +1110,37 @@ function showMsPopup(id, name, dateLabel, wp, description) {
         <span>📦 ${wp}</span>
       </div>
       <div class="ms-popup-desc">${descContent}</div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+// ── Work Package Popup (for Gantt chart clicks) ──
+function showWpPopup(wpId) {
+  const wp = window._wpData[wpId];
+  if (!wp) return;
+  const activities = wp.activities ? wp.activities.split(';').map(a => a.trim()).filter(Boolean) : [];
+  const activitiesHtml = activities.length > 0
+    ? `<div class="wp-popup-activities"><ul>${activities.map(a => `<li>${a}</li>`).join('')}</ul></div>`
+    : `<div class="wp-popup-activities"><span class="milestone-no-desc">Keine Aktivitäten hinterlegt.</span></div>`;
+  const prog = wp.prog || 0;
+  const progColor = prog > 66 ? '#8aff6c' : prog > 33 ? '#ffb86c' : '#ff6c8a';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'ms-popup-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="ms-popup">
+      <div class="ms-popup-header">
+        <span class="wp-badge" style="background:${wp.color || 'var(--accent)'};width:12px;height:12px;border-radius:3px;display:inline-block;"></span>
+        <span class="ms-popup-title">${wpId}: ${wp.name || ''}</span>
+        <button class="ms-popup-close" onclick="this.closest('.ms-popup-overlay').remove()">✕</button>
+      </div>
+      <div class="ms-popup-meta">
+        <span>📅 ${wp.startLabel} → ${wp.endLabel}</span>
+        <span>👤 ${wp.lead || '—'}</span>
+        <span style="color:${progColor};font-weight:600;">📊 ${prog}%</span>
+      </div>
+      ${activitiesHtml}
     </div>`;
   document.body.appendChild(overlay);
 }
